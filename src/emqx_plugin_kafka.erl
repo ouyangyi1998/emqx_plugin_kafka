@@ -7,7 +7,7 @@
 %% you may not use this file except in compliance with the License.
 %% You may obtain a copy of the License at
 %%
-%%     http://www.apache.org/licenses/LICENSE-2.0
+%%      http://www.apache.org/licenses/LICENSE-2.0
 %%
 %% Unless required by applicable law or agreed to in writing, software
 %% distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,10 +17,6 @@
 %%--------------------------------------------------------------------
 
 -module(emqx_plugin_kafka).
-
-% -include("emqx_plugin_kafka.hrl").
-
-% -include_lib("emqx/include/emqx.hrl").
 
 -include("emqx.hrl").
 -include_lib("kernel/include/logger.hrl").
@@ -59,25 +55,74 @@
 %% Called when the plugin application start
 load(Env) ->
   kafka_init([Env]),
-  emqx:hook('client.connect', {?MODULE, on_client_connect, [Env]}),
-  emqx:hook('client.connack', {?MODULE, on_client_connack, [Env]}),
+  %% =================================================================
+  %% 【修改点】只保留 connected 和 disconnected，其他全部注释掉
+  %% =================================================================
+  
+  %% emqx:hook('client.connect', {?MODULE, on_client_connect, [Env]}),
+  %% emqx:hook('client.connack', {?MODULE, on_client_connack, [Env]}),
+  
+  %% [保留] 客户端上线
   emqx:hook('client.connected', {?MODULE, on_client_connected, [Env]}),
+  
+  %% [保留] 客户端下线
   emqx:hook('client.disconnected', {?MODULE, on_client_disconnected, [Env]}),
-  emqx:hook('client.authenticate', {?MODULE, on_client_authenticate, [Env]}),
-  emqx:hook('client.check_acl', {?MODULE, on_client_check_acl, [Env]}),
-  emqx:hook('client.subscribe', {?MODULE, on_client_subscribe, [Env]}),
-  emqx:hook('client.unsubscribe', {?MODULE, on_client_unsubscribe, [Env]}),
-  emqx:hook('session.created', {?MODULE, on_session_created, [Env]}),
-  emqx:hook('session.subscribed', {?MODULE, on_session_subscribed, [Env]}),
-  emqx:hook('session.unsubscribed', {?MODULE, on_session_unsubscribed, [Env]}),
-  emqx:hook('session.resumed', {?MODULE, on_session_resumed, [Env]}),
-  emqx:hook('session.discarded', {?MODULE, on_session_discarded, [Env]}),
-  emqx:hook('session.takeovered', {?MODULE, on_session_takeovered, [Env]}),
-  emqx:hook('session.terminated', {?MODULE, on_session_terminated, [Env]}),
-  emqx:hook('message.publish', {?MODULE, on_message_publish, [Env]}),
-  emqx:hook('message.delivered', {?MODULE, on_message_delivered, [Env]}),
-  emqx:hook('message.acked', {?MODULE, on_message_acked, [Env]}),
-  emqx:hook('message.dropped', {?MODULE, on_message_dropped, [Env]}).
+  
+  %% emqx:hook('client.authenticate', {?MODULE, on_client_authenticate, [Env]}),
+  %% emqx:hook('client.check_acl', {?MODULE, on_client_check_acl, [Env]}),
+  %% emqx:hook('client.subscribe', {?MODULE, on_client_subscribe, [Env]}),
+  %% emqx:hook('client.unsubscribe', {?MODULE, on_client_unsubscribe, [Env]}),
+  %% emqx:hook('session.created', {?MODULE, on_session_created, [Env]}),
+  %% emqx:hook('session.subscribed', {?MODULE, on_session_subscribed, [Env]}),
+  %% emqx:hook('session.unsubscribed', {?MODULE, on_session_unsubscribed, [Env]}),
+  %% emqx:hook('session.resumed', {?MODULE, on_session_resumed, [Env]}),
+  %% emqx:hook('session.discarded', {?MODULE, on_session_discarded, [Env]}),
+  %% emqx:hook('session.takeovered', {?MODULE, on_session_takeovered, [Env]}),
+  %% emqx:hook('session.terminated', {?MODULE, on_session_terminated, [Env]}),
+  
+  %% [屏蔽] 消息发布、投递、Ack、丢弃
+  %% emqx:hook('message.publish', {?MODULE, on_message_publish, [Env]}),
+  %% emqx:hook('message.delivered', {?MODULE, on_message_delivered, [Env]}),
+  %% emqx:hook('message.acked', {?MODULE, on_message_acked, [Env]}),
+  %% emqx:hook('message.dropped', {?MODULE, on_message_dropped, [Env]}).
+  ok.
+
+%% Called when the plugin application stop
+unload() ->
+  %% =================================================================
+  %% 【修改点】卸载逻辑也要同步注释掉
+  %% =================================================================
+  
+  %% emqx:unhook('client.connect', {?MODULE, on_client_connect}),
+  %% emqx:unhook('client.connack', {?MODULE, on_client_connack}),
+  
+  %% [保留] 卸载上线钩子
+  emqx:unhook('client.connected', {?MODULE, on_client_connected}),
+  
+  %% [保留] 卸载下线钩子
+  emqx:unhook('client.disconnected', {?MODULE, on_client_disconnected}),
+  
+  %% emqx:unhook('client.authenticate', {?MODULE, on_client_authenticate}),
+  %% emqx:unhook('client.check_acl', {?MODULE, on_client_check_acl}),
+  %% emqx:unhook('client.subscribe', {?MODULE, on_client_subscribe}),
+  %% emqx:unhook('client.unsubscribe', {?MODULE, on_client_unsubscribe}),
+  %% emqx:unhook('session.created', {?MODULE, on_session_created}),
+  %% emqx:unhook('session.subscribed', {?MODULE, on_session_subscribed}),
+  %% emqx:unhook('session.unsubscribed', {?MODULE, on_session_unsubscribed}),
+  %% emqx:unhook('session.resumed', {?MODULE, on_session_resumed}),
+  %% emqx:unhook('session.discarded', {?MODULE, on_session_discarded}),
+  %% emqx:unhook('session.takeovered', {?MODULE, on_session_takeovered}),
+  %% emqx:unhook('session.terminated', {?MODULE, on_session_terminated}),
+  
+  %% [屏蔽]
+  %% emqx:unhook('message.publish', {?MODULE, on_message_publish}),
+  %% emqx:unhook('message.delivered', {?MODULE, on_message_delivered}),
+  %% emqx:unhook('message.acked', {?MODULE, on_message_acked}),
+  %% emqx:unhook('message.dropped', {?MODULE, on_message_dropped}).
+  ok.
+
+%% 下面的代码保持原样即可，因为没有 Hook 注册，它们不会被调用
+%% ------------------------------------------------------------------
 
 on_client_connect(ConnInfo = #{clientid := ClientId}, Props, _Env) ->
   ?LOG_INFO("[KAFKA PLUGIN]Client(~s) connect, ConnInfo: ~p, Props: ~p~n",
@@ -308,28 +353,6 @@ format_payload(Message) ->
 
   {ok, ClientId, Payload}.
 
-
-%% Called when the plugin application stop
-unload() ->
-  emqx:unhook('client.connect', {?MODULE, on_client_connect}),
-  emqx:unhook('client.connack', {?MODULE, on_client_connack}),
-  emqx:unhook('client.connected', {?MODULE, on_client_connected}),
-  emqx:unhook('client.disconnected', {?MODULE, on_client_disconnected}),
-  emqx:unhook('client.authenticate', {?MODULE, on_client_authenticate}),
-  emqx:unhook('client.check_acl', {?MODULE, on_client_check_acl}),
-  emqx:unhook('client.subscribe', {?MODULE, on_client_subscribe}),
-  emqx:unhook('client.unsubscribe', {?MODULE, on_client_unsubscribe}),
-  emqx:unhook('session.created', {?MODULE, on_session_created}),
-  emqx:unhook('session.subscribed', {?MODULE, on_session_subscribed}),
-  emqx:unhook('session.unsubscribed', {?MODULE, on_session_unsubscribed}),
-  emqx:unhook('session.resumed', {?MODULE, on_session_resumed}),
-  emqx:unhook('session.discarded', {?MODULE, on_session_discarded}),
-  emqx:unhook('session.takeovered', {?MODULE, on_session_takeovered}),
-  emqx:unhook('session.terminated', {?MODULE, on_session_terminated}),
-  emqx:unhook('message.publish', {?MODULE, on_message_publish}),
-  emqx:unhook('message.delivered', {?MODULE, on_message_delivered}),
-  emqx:unhook('message.acked', {?MODULE, on_message_acked}),
-  emqx:unhook('message.dropped', {?MODULE, on_message_dropped}).
 
 produce_kafka_payload(Key, Message) ->
   Topic = get_kafka_topic(),
